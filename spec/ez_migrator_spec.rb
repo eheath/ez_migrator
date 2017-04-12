@@ -4,13 +4,13 @@ require 'file_reader'
 module EzMigrator
   describe Worker do
     before(:example) {
-      allow_any_instance_of(EzMigrator::Migration).to receive(:applied_migrations).and_return({'foo.sql' => Time.now})
+      allow_any_instance_of(EzMigrator::Migration).to receive(:applied_migrations).and_return(['foo.sql'])
       allow_any_instance_of(EzMigrator::Migration).to receive(:generate).and_return(true)
       allow_any_instance_of(EzMigrator::Migration).to receive(:list_all).and_return( ['bar.sql', 'baz.sql', 'foo.sql'])
       allow_any_instance_of(EzMigrator::Migration).to receive(:up_definition).and_return('lorem ipsum')
     }
     let(:migration_obj) { EzMigrator::Migration.new }
-    let(:db_connection) { double('db_connection', exec: true) }
+    let(:db_connection) { DbConnection.new }
     let(:ez_migrator){ EzMigrator::Worker.new(db_connection: db_connection, migration_obj: migration_obj) }
 
     it "has a version number" do

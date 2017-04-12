@@ -5,6 +5,7 @@ module EzMigrator
     def initialize file_name: nil, db_connection: DbConnection.new
       @file_name = file_name unless file_name.nil?
       @db_connection = db_connection unless db_connection.nil?
+      create_schema unless version_table_exists?
     end
 
     def generate file_name
@@ -17,7 +18,7 @@ module EzMigrator
     end
 
     def applied_migrations
-      current_versions.map{|v| Dir.glob("./migrations/#{v}*.sql")}.flatten.compact
+      current_versions.map{|v| File.basename(Dir.glob("./migrations/#{v}*.sql"))}.flatten.compact
     end
 
     def current_versions
@@ -25,7 +26,7 @@ module EzMigrator
     end
 
     def pending_migrations
-      (list_all - applied_migrations).map{|pm| File.basename pm }
+      list_all - applied_migrations
     end
 
     def file_sample_contents
@@ -76,6 +77,28 @@ module EzMigrator
 
     def down_definition
       File.read("./migrations/#{file_name}")[/--\s*down start(.*?)--\s*down end/m, 1].strip
+    end
+
+    private
+
+    def version_table_exists?
+      sql = <<~HEREDOC
+      SELECT 1
+      FROM   information_schema.tables
+      WHERE  table_schema = 'public'
+      AND    table_name = 'schema_version'
+      HEREDOC
+      @db_connection.exec(sql).ntuples == 1
+    end
+
+    def create_schema
+      sql = <<~HEREDOC
+      CREATE TABLE public.schema_version(
+        version text,
+        applied_at timestamp without time zone default current_timestamp
+      )
+      HEREDOC
+      @db_connection.exec(sql)
     end
 
   end

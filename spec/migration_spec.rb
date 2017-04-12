@@ -52,7 +52,7 @@ module EzMigrator
 
     it 'can migrate up and down' do
       file_name = Migration.new.generate('foo_bar').split(' ')[1]
-      File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
+      # File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
       migration = Migration.new(file_name: file_name)
       migration.apply
       expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(1)
