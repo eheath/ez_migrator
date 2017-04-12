@@ -56,10 +56,6 @@ module EzMigrator
       file_name
     end
 
-    def up_definition
-      File.read("./migrations/#{file_name}")[/--\s*up start(.*?)--\s*up end/im, 1].strip
-    end
-
     def apply
       @db_connection.exec(up_definition)
       @schema_version.update(version: version)
@@ -75,7 +71,11 @@ module EzMigrator
     end
 
     def down_definition
-      File.read("./migrations/#{file_name}")[/--\s*down start(.*?)--\s*down end/m, 1].strip
+      File.read("./migrations/#{file_name}")[/--\s*rollback start(.*?)--\s*rollback end/im, 1].strip
+    end
+
+    def up_definition
+      File.read("./migrations/#{file_name}")[/--\s*up start(.*?)--\s*up end/im, 1].strip
     end
 
   end

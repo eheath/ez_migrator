@@ -13,6 +13,15 @@ module EzMigrator
     let(:db_connection) { DbConnection.new }
     let(:ez_migrator){ EzMigrator::Worker.new(db_connection: db_connection, migration_obj: migration_obj) }
 
+    before(:example) do
+      cleanup db_connection
+    end
+
+    after(:example) do
+      cleanup db_connection
+    end
+
+
     it "has a version number" do
       expect(EzMigrator::VERSION).not_to be nil
     end

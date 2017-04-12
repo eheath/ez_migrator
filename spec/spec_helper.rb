@@ -7,4 +7,12 @@ require_relative '../lib/file_writer.rb'
 require_relative '../lib/file_reader.rb'
 require_relative '../lib/config.rb'
 require_relative '../lib/schema_version.rb'
+require 'fileutils'
+
+def cleanup db_connection
+  db_connection.exec( "drop table if exists foo.bar;")
+  FileUtils.rm Dir.glob('./migrations/*.sql')
+  FileUtils.rm Dir.glob('schema_version.json')
+end
+
 

@@ -1,24 +1,18 @@
 require 'spec_helper'
-require 'config'
-require 'fileutils'
+# require 'config'
 
 module EzMigrator
   describe Migration do
     let(:config) { Config.new({env: 'test', file_name: 'config.yml'}) }
     let(:db_connection) { DbConnection.new(config)}
     let(:migration) { Migration.new(file_name: 'foo.sql')}
-    let(:example_contents) { "--up start\ncreate table foo_bar ( baz text );\n-- up end\n-- down start\ndrop table foo_bar;\n--down end\n" }
-    let(:clear_db) { db_connection.exec( "drop table if exists foo.bar; delete from public.schema_version;") }
-    let(:clear_migrations) { FileUtils.rm Dir.glob('./migrations/*.sql') }
 
     before(:example) do
-      clear_migrations
-      clear_db
+      cleanup db_connection
     end
 
     after(:example) do
-      clear_migrations
-      clear_db
+      cleanup db_connection
     end
 
     it "file_name" do
@@ -40,33 +34,28 @@ module EzMigrator
 
     it 'up_definition' do
       file_name = Migration.new.generate('foo_bar').split(' ')[1]
-      File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
-      expect(Migration.new(file_name: file_name).up_definition).to match(/create table foo_bar/)
+      expect(Migration.new(file_name: file_name).up_definition).to match(/create table foo.bar/i)
     end
 
     it 'down_definition' do
       file_name = Migration.new.generate('foo_bar').split(' ')[1]
-      File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
-      expect(Migration.new(file_name: file_name).down_definition).to match(/drop table foo_bar/)
+      expect(Migration.new(file_name: file_name).down_definition).to match(/drop table foo.bar/i)
     end
 
     it 'can migrate up and down' do
       file_name = Migration.new.generate('foo_bar').split(' ')[1]
-      # File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
       migration = Migration.new(file_name: file_name)
       migration.apply
-      # expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(1)
-      expect(migration.current_versions).to eq(file_name.split('_')[0])
-
+      expect(migration.current_versions).to eq([file_name.split('_')[0]])
       migration.rollback
-      # expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(0)
       expect(migration.current_versions.count).to eq(0)
     end
 
     it 'knows which migrations have been applied' do
-      migration_1_filename = Migration.new.generate('create_foo').split(' ')[1]
+      migration_1_filename = Migration.new.generate('create_foo_to_apply').split(' ')[1]
       Migration.new(file_name: migration_1_filename).apply
       unapplied_migration = Migration.new(file_name: 'create_bar')
+      byebug
       expect(Migration.new.applied_migrations).to eq(["./migrations/#{migration_1_filename}"])
     end
 
