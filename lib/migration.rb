@@ -14,11 +14,18 @@ module EzMigrator
     end
 
     def list_all
-      Dir.glob("./migrations/*.sql")
+      Dir.glob("./migrations/*.sql").map{|f| File.basename f}
     end
 
     def applied_migrations
-      current_versions.map{|v| File.basename(Dir.glob("./migrations/#{v}*.sql"))}.flatten.compact
+      applied_files = []
+      if current_versions.count > 0
+        migration_files = current_versions.map{|v| Dir.glob("./migrations/#{v}*.sql") }.flatten.compact
+        if migration_files.count > 0
+          applied_files = migration_files.map{|f| File.basename(f)}
+        end
+      end
+      applied_files
     end
 
     def current_versions

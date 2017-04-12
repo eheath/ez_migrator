@@ -7,7 +7,7 @@ module EzMigrator
   class Worker
     attr_reader :db_connection
 
-    def initialize(db_connection: DbConnection.new, migration_obj: nil)
+    def initialize(db_connection: DbConnection.new, migration_obj: Migration.new)
       @db_connection = db_connection unless db_connection.nil?
       @migration_obj = migration_obj unless migration_obj.nil?
     end

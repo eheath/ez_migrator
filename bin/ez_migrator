@@ -6,16 +6,14 @@ require_relative '../lib/file_reader'
 require_relative '../lib/config'
 require_relative '../lib/file_writer'
 
-config_info = EzMigrator::Config.new({env: 'test', filename: 'config.yml'})
+puts "Starting..."
 
-db_connection = EzMigrator::DbConnection.new( config_info )
-
-ez_migrator = EzMigrator::Worker.new
-
-if ARGV[0] =~ /generate/ && !ARGV[1].nil?
-  ez_migrator.generate ARGV[1]
+if !!(ARGV[0] =~ /^generate$/) && !ARGV[1].nil?
+  EzMigrator::Worker.new.generate ARGV[1]
 end
 
-if ARGV[0] =~ /migrate/
-  ez_migrator.migrate
+if (%w(test dev qa prod).include? ARGV[0]) && !!(ARGV[1] =~ /^migrate$/) && ARGV[2].nil?
+  config_info = EzMigrator::Config.new({env: ARGV[0], filename: 'config.yml'})
+  db_connection = EzMigrator::DbConnection.new( config_info )
+  EzMigrator::Worker.new(db_connection: db_connection).migrate
 end
