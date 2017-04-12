@@ -55,9 +55,12 @@ module EzMigrator
       # File.open("./migrations/#{file_name}", 'w'){ |f| f.write example_contents }
       migration = Migration.new(file_name: file_name)
       migration.apply
-      expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(1)
+      # expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(1)
+      expect(migration.current_versions).to eq(file_name.split('_')[0])
+
       migration.rollback
-      expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(0)
+      # expect(db_connection.exec("select * from public.schema_version where version like '%#{migration.version}%'").ntuples).to eq(0)
+      expect(migration.current_versions.count).to eq(0)
     end
 
     it 'knows which migrations have been applied' do

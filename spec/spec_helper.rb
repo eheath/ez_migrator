@@ -6,4 +6,5 @@ require 'db_connection'
 require_relative '../lib/file_writer.rb'
 require_relative '../lib/file_reader.rb'
 require_relative '../lib/config.rb'
+require_relative '../lib/schema_version.rb'
 

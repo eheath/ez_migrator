@@ -2,10 +2,10 @@ module EzMigrator
   class Migration
     attr_reader :file_name
 
-    def initialize file_name: nil, db_connection: DbConnection.new
+    def initialize file_name: nil, db_connection: DbConnection.new, config_obj: Config.new({env: 'test'})
       @file_name = file_name unless file_name.nil?
       @db_connection = db_connection unless db_connection.nil?
-      create_schema unless version_table_exists?
+      @schema_version = SchemaVersion.new(config_obj: config_obj)
     end
 
     def generate file_name
@@ -29,7 +29,7 @@ module EzMigrator
     end
 
     def current_versions
-      @db_connection.exec('select * from schema_version').map{ |sv| sv['version'] }
+      @schema_version.current_versions
     end
 
     def pending_migrations
@@ -62,20 +62,12 @@ module EzMigrator
 
     def apply
       @db_connection.exec(up_definition)
-      update_db_version
+      @schema_version.update(version: version)
     end
 
     def rollback
       @db_connection.exec(down_definition)
-      rollback_db_version
-    end
-
-    def update_db_version
-      @db_connection.exec("insert into public.schema_version values(#{version})")
-    end
-
-    def rollback_db_version
-      @db_connection.exec("delete from public.schema_version where version = '#{version}'")
+      @schema_version.rollback(version: version)
     end
 
     def version
@@ -84,29 +76,6 @@ module EzMigrator
 
     def down_definition
       File.read("./migrations/#{file_name}")[/--\s*down start(.*?)--\s*down end/m, 1].strip
-    end
-
-    private
-
-    def version_table_exists?
-      sql = <<~HEREDOC
-      SELECT 1
-      FROM   information_schema.tables
-      WHERE  table_schema = 'public'
-      AND    table_name = 'schema_version'
-      HEREDOC
-      @db_connection.exec(sql).ntuples == 1
-    end
-
-    def create_schema
-      sql = <<~HEREDOC
-      CREATE TABLE public.schema_version(
-        version text,
-        applied_at timestamp without time zone default current_timestamp,
-        CONSTRAINT schema_version_pk PRIMARY KEY (version)
-      )
-      HEREDOC
-      @db_connection.exec(sql)
     end
 
   end

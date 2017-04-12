@@ -6,13 +6,14 @@ require 'migration'
 module EzMigrator
   class Worker
 
-    def initialize(db_connection: DbConnection.new, config_obj: Config.new(env: 'test'))
+    def initialize(db_connection: DbConnection.new, config_obj: Config.new(env: 'test'), migration_obj: nil)
       @db_connection = db_connection unless db_connection.nil?
       @config_obj = config_obj
+      @migration_obj = migration_obj unless migration_obj.nil?
     end
 
     def migration_obj
-      @migration_obj ||= EzMigrator::Migration.new(db_connection: @db_connection)
+      @migration_obj ||= EzMigrator::Migration.new(db_connection: @db_connection, config_obj: @config_obj)
     end
 
     def generate file_name
