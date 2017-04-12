@@ -102,7 +102,8 @@ module EzMigrator
       sql = <<~HEREDOC
       CREATE TABLE public.schema_version(
         version text,
-        applied_at timestamp without time zone default current_timestamp
+        applied_at timestamp without time zone default current_timestamp,
+        CONSTRAINT schema_version_pk PRIMARY KEY (version)
       )
       HEREDOC
       @db_connection.exec(sql)

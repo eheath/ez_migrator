@@ -12,8 +12,24 @@ if !!(ARGV[0] =~ /^generate$/) && !ARGV[1].nil?
   EzMigrator::Worker.new.generate ARGV[1]
 end
 
-if (%w(test dev qa prod).include? ARGV[0]) && !!(ARGV[1] =~ /^migrate$/) && ARGV[2].nil?
-  config_info = EzMigrator::Config.new({env: ARGV[0], filename: 'config.yml'})
-  db_connection = EzMigrator::DbConnection.new( config_info )
-  EzMigrator::Worker.new(db_connection: db_connection).migrate
+if (%w(test dev qa prod).include? ARGV[0])
+
+  config_obj = EzMigrator::Config.new({env: ARGV[0]})
+  db_connection = EzMigrator::DbConnection.new( config_obj )
+  ez_migrator = EzMigrator::Worker.new(db_connection: db_connection, config_obj: config_obj)
+
+  if !!(ARGV[1] =~ /^migrate$/) && ARGV[2].nil?
+    ez_migrator.migrate
+  end
+
+  if !!(ARGV[1] =~ /^pending$/)
+    if ez_migrator.pending_migrations.count
+      puts "Pending Migrations for env: #{config_obj.env}"
+      puts ez_migrator.pending_migrations
+    else
+      puts "No pending migrations for environment #{config_obj.env}"
+    end
+  end
+
+
 end
