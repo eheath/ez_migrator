@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/ez_migrator'
+require_relative '../lib/db_connection'
+require_relative '../lib/file_reader'
+require_relative '../lib/config'
+require_relative '../lib/file_writer'
+
+config_info = EzMigrator::Config.new({env: 'test', filename: 'config.yml'})
+
+db_connection = EzMigrator::DbConnection.new( config_info )
+
+ez_migrator = EzMigrator::Worker.new
+
+if ARGV[0] =~ /generate/ && !ARGV[1].nil?
+  ez_migrator.generate ARGV[1]
+end
+
+if ARGV[0] =~ /migrate/
+  ez_migrator.migrate
+end
