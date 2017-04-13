@@ -3,14 +3,8 @@ require 'file_reader'
 
 module EzMigrator
   describe Worker do
-    before(:example) {
-      allow_any_instance_of(EzMigrator::Migration).to receive(:applied_migrations).and_return(['foo.sql'])
-      allow_any_instance_of(EzMigrator::Migration).to receive(:generate).and_return(true)
-      allow_any_instance_of(EzMigrator::Migration).to receive(:list_all).and_return( ['bar.sql', 'baz.sql', 'foo.sql'])
-      allow_any_instance_of(EzMigrator::Migration).to receive(:up_definition).and_return('lorem ipsum')
-    }
-    let(:migration_obj) { EzMigrator::Migration.new }
     let(:db_connection) { DbConnection.new }
+    let(:migration_obj) { EzMigrator::Migration.new(db_connection: db_connection) }
     let(:ez_migrator){ EzMigrator::Worker.new(db_connection: db_connection, migration_obj: migration_obj) }
 
     before(:example) do
@@ -42,12 +36,13 @@ module EzMigrator
     end
 
     it "pending_migrations" do
-      expect(ez_migrator.pending_migrations).to eq(['bar.sql', 'baz.sql'])
+      Migration.new.generate 'blue_tomato'
+      expect(ez_migrator.pending_migrations.first).to match(/blue_tomato/)
     end
 
     it "migrate" do
-      expect(db_connection).to receive(:exec).with('lorem ipsum').twice
-      ez_migrator.migrate
+      Migration.new.generate 'apply_this_migration'
+      expect(ez_migrator.migrate.first).to match(/apply_this_migration/)
     end
 
   end

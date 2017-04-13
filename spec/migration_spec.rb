@@ -55,15 +55,14 @@ module EzMigrator
       migration_1_filename = Migration.new.generate('create_foo_to_apply').split(' ')[1]
       Migration.new(file_name: migration_1_filename).apply
       unapplied_migration = Migration.new(file_name: 'create_bar')
-      byebug
-      expect(Migration.new.applied_migrations).to eq(["./migrations/#{migration_1_filename}"])
+      expect(Migration.new.applied_migrations).to eq(["#{migration_1_filename}"])
     end
 
     it 'knows which migrations are pending' do
       migration_1_filename = Migration.new.generate('create_foo').split(' ')[1]
       Migration.new(file_name: migration_1_filename).apply
       unapplied_migration = Migration.new.generate('create_bar').split(' ')[1]
-      expect(Migration.new.pending_migrations).to eq(["./migrations/#{unapplied_migration}"])
+      expect(Migration.new.pending_migrations).to eq(["#{unapplied_migration}"])
     end
 
   end

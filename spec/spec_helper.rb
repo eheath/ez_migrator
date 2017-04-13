@@ -14,5 +14,3 @@ def cleanup db_connection
   FileUtils.rm Dir.glob('./migrations/*.sql')
   FileUtils.rm Dir.glob('schema_version.json')
 end
-
-

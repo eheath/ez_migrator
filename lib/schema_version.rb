@@ -1,6 +1,9 @@
 require 'json'
 module EzMigrator
   class SchemaVersion
+
+    attr_reader :file_name
+
     def initialize config_obj: Config.new({env: 'test'})
       @file_name  = config_obj.schema_version
       @env        = config_obj.env
@@ -21,15 +24,14 @@ module EzMigrator
     def update version: nil
       unless version.nil?
         datastore[ @env ][ version ] = Time.now
-        byebug
-        File.open( @file_name, 'w' ) { |f| f.write( datastore ) }
+        File.open( @file_name, 'w' ) { |f| f.write( datastore.to_json ) }
       end
     end
 
     def rollback version: nil
       unless version.nil?
         datastore[ @env ].delete( version )
-        File.open( @file_name, 'w' ) { |f| f.write datastore }
+        File.open( @file_name, 'w' ) { |f| f.write datastore.to_json }
       end
     end
 

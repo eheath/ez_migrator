@@ -1,6 +1,6 @@
 module EzMigrator
   class Migration
-    attr_reader :file_name
+    attr_reader :file_name, :schema_version
 
     def initialize file_name: nil, db_connection: DbConnection.new, config_obj: Config.new({env: 'test'})
       @file_name = file_name unless file_name.nil?
