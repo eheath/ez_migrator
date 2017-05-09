@@ -5,6 +5,7 @@ require_relative '../lib/db_connection'
 require_relative '../lib/file_reader'
 require_relative '../lib/config'
 require_relative '../lib/file_writer'
+require_relative '../lib/schema_version'
 
 puts "Starting..."
 
