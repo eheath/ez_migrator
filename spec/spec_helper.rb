@@ -12,5 +12,9 @@ require 'fileutils'
 def cleanup db_connection
   db_connection.exec( "drop table if exists foo.bar;")
   FileUtils.rm Dir.glob('./migrations/*.sql')
-  FileUtils.rm Dir.glob('schema_version.json')
+  delete_schema_versions
+end
+
+def delete_schema_versions
+  FileUtils.rm Dir.glob('*.schema_version')
 end

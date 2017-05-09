@@ -46,7 +46,7 @@ module EzMigrator
       file_name = Migration.new.generate('foo_bar').split(' ')[1]
       migration = Migration.new(file_name: file_name)
       migration.apply
-      expect(migration.current_versions).to eq([file_name.split('_')[0]])
+      expect(migration.current_versions).to eq([file_name])
       migration.rollback
       expect(migration.current_versions.count).to eq(0)
     end

@@ -10,6 +10,7 @@ module EzMigrator
                                   dbname:   config_info.db_name,
                                   user:     config_info.db_user,
                                   password: config_info.db_pass )
+      @conn.exec('SET client_min_messages TO WARNING')
     end
 
     def exec sql

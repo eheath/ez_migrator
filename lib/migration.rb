@@ -18,18 +18,19 @@ module EzMigrator
     end
 
     def applied_migrations
-      applied_files = []
-      if current_versions.count > 0
-        migration_files = current_versions.map{|v| Dir.glob("./migrations/#{v}*.sql") }.flatten.compact
-        if migration_files.count > 0
-          applied_files = migration_files.map{|f| File.basename(f)}
-        end
-      end
-      applied_files
+      @schema_version.current
+      # applied_files = []
+      # if current_versions.count > 0
+      #   migration_files = current_versions.map{|v| Dir.glob("./migrations/#{v}*.sql") }.flatten.compact
+      #   if migration_files.count > 0
+      #     applied_files = migration_files.map{|f| File.basename(f)}
+      #   end
+      # end
+      # applied_files
     end
 
     def current_versions
-      @schema_version.current_versions
+      @schema_version.current
     end
 
     def pending_migrations
@@ -67,7 +68,8 @@ module EzMigrator
     end
 
     def version
-      file_name.split('_')[0]
+      # file_name.split('_')[0]
+      file_name
     end
 
     def down_definition
